@@ -131,10 +131,12 @@ uint8_t baseData::updateTTL()
                         return DELETED_PUB;
                     }
                 }
+                m_listTTL->pop();
                 return OK;
             }
             else
             {
+                m_listTTL->pop();
                 return OK;
             }
         }
