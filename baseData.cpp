@@ -133,6 +133,10 @@ uint8_t baseData::updateTTL()
                 }
                 return OK;
             }
+            else
+            {
+                return OK;
+            }
         }
         else
         {
