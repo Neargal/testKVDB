@@ -13,15 +13,6 @@ zmqServerBD::zmqServerBD() : m_request(0), m_reply(0), m_nameTable(nullptr), m_k
 
 zmqServerBD::~zmqServerBD()
 {
-    if( m_nameTable != nullptr )
-        free(m_nameTable);
-
-    if( m_key != nullptr )
-        free(m_key);
-
-    if( m_value != nullptr )
-        free(m_value);
-
 	zmq_close(m_rep);
 	zmq_close(m_pub);
 	zmq_ctx_destroy(m_context);
