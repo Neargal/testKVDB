@@ -38,6 +38,7 @@ unsigned int baseData::hash(char* nameTable)
 bool baseData::setQueuePUB(queuePUB* queuePUB)
 {
     m_queuePUB = queuePUB;
+    return true;
 }
 
 uint8_t baseData::createTable(char* nameTable)

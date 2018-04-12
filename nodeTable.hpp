@@ -17,10 +17,10 @@ public:
     nodeTable() : m_next(nullptr), m_table(nullptr), m_name(nullptr) {}
     ~nodeTable()
     {
-        if( m_name != nullptr )
-            free(m_name);
         if( m_table != nullptr )
             delete m_table;
+        if( m_name != nullptr )
+            free(m_name);
     }
 };
 
