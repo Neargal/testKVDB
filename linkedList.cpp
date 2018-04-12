@@ -8,6 +8,7 @@ linkedList::~linkedList()
 
     while( m_head != nullptr )
     {
+        m_queuePUB->push(m_name, m_head->m_key, m_head->m_lenKey, DELETED_PUB);
         m_head = node->m_next;
         delete node;
         node = m_head;
