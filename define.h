@@ -29,6 +29,7 @@
 
 #define MAX_SIZE_REQ   1
 #define MAX_SIZE_TABLE 255
+#define MAX_SIZE_VALUE 1024
 #define MAX_SIZE_KEY   sizeof(uint64_t)
 #define MAX_SIZE_TTL   sizeof(uint64_t)
 

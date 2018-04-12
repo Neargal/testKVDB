@@ -18,6 +18,9 @@ private:
 	void* m_rep;
 	void* m_pub;
 
+    int m_more;
+    size_t m_more_size;
+
     uint8_t m_request;
     uint8_t m_reply;
     char* m_nameTable;
@@ -31,6 +34,11 @@ private:
 	queuePUB m_queuePUB;
 
 	bool errRep(uint8_t reason);
+	bool okRep();
+	bool reqTableName();
+	bool reqKey();
+	bool reqValue();
+
 public:
     zmqServerBD();
     ~zmqServerBD();
