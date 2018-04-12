@@ -13,7 +13,6 @@ linkedList::~linkedList()
         delete node;
         node = m_head;
     }
-    free(m_name);
 }
 
 bool linkedList::setQueuePUB(queuePUB* queuePUB)
@@ -24,9 +23,7 @@ bool linkedList::setQueuePUB(queuePUB* queuePUB)
 
 bool linkedList::setNameTable(char* nameTable)
 {
-    m_name = (char*)malloc(strlen(nameTable) + 1);
-    memcpy(m_name, nameTable, strlen(nameTable));
-    m_name[strlen(nameTable)] = 0;
+    m_name = nameTable;
     return true;
 }
 
