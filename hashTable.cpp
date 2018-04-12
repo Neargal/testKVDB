@@ -1,6 +1,6 @@
 #include "hashTable.hpp"
 
-hashTable::hashTable()
+hashTable::hashTable(): m_queuePUB(nullptr)
 {
     for(int i = 0; i < TABLE_SIZE; i++)
     {
@@ -19,6 +19,11 @@ hashTable::~hashTable()
     }
 }
 
+bool hashTable::setQueuePUB(queuePUB* queuePUB)
+{
+    m_queuePUB = queuePUB;
+}
+
 unsigned int hashTable::hash(void* key, unsigned int lenKey)
 {
     unsigned int index = 0;
@@ -33,13 +38,15 @@ unsigned int hashTable::hash(void* key, unsigned int lenKey)
     return index;
 }
 
-uint8_t hashTable::insert(void* key, void* value, unsigned int lenKey, unsigned int lenValue, uint64_t ttl_sec)
+uint8_t hashTable::insert(char* nameTable, void* key, void* value, unsigned int lenKey, unsigned int lenValue, uint64_t ttl_sec)
 {
     unsigned int index = hashTable::hash(key, lenKey);
 
     if( m_table[index] == nullptr )
     {
         m_table[index] = new linkedList;
+        m_table[index]->setQueuePUB(m_queuePUB);
+        m_table[index]->setNameTable(nameTable);
     }
 
     return m_table[index]->insert(key, value, lenKey, lenValue, ttl_sec);

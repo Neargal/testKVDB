@@ -12,6 +12,7 @@
 #include <time.h>
 
 #include "define.h"
+#include "queuePUB.hpp"
 
 class Node
 {

@@ -9,6 +9,7 @@
 #include <zmq.h>
 
 #include "baseData.hpp"
+#include "queuePUB.hpp"
 
 class zmqServerBD
 {
@@ -16,7 +17,6 @@ private:
 	void* m_context;
 	void* m_rep;
 	void* m_pub;
-    zmq_msg_t m_message;
 
     uint8_t m_request;
     uint8_t m_reply;
@@ -28,9 +28,9 @@ private:
     uint64_t m_ttl_sec;
 
 	baseData m_baseData;
+	queuePUB m_queuePUB;
 
 	bool errRep(uint8_t reason);
-	bool sendPub(uint8_t reason);
 public:
     zmqServerBD();
     ~zmqServerBD();

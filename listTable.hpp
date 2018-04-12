@@ -12,9 +12,11 @@ class listTable
 {
 private:
     nodeTable* m_head;
+    queuePUB* m_queuePUB;
 public:
     listTable();
     ~listTable();
+    bool setQueuePUB(queuePUB* queuePUB);
     uint8_t createTable(char* nameTable);
     uint8_t removeTable(char* nameTable);
     uint8_t insert(char* nameTable, void* key, void* value, unsigned int lenKey, unsigned int lenValue, uint64_t ttl_sec);

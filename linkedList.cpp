@@ -1,6 +1,6 @@
 #include "linkedList.hpp"
 
-linkedList::linkedList() : m_head(nullptr) {}
+linkedList::linkedList() : m_head(nullptr), m_name(nullptr), m_queuePUB(nullptr) {}
 
 linkedList::~linkedList()
 {
@@ -14,6 +14,18 @@ linkedList::~linkedList()
     }
 }
 
+bool linkedList::setQueuePUB(queuePUB* queuePUB)
+{
+    m_queuePUB = queuePUB;
+    return true;
+}
+
+bool linkedList::setNameTable(char* nameTable)
+{
+    m_name = nameTable;
+    return true;
+}
+
 uint8_t linkedList::insert(void* key, void* value, unsigned int lenKey, unsigned int lenValue, uint64_t ttl_sec)
 {
     if( m_head == nullptr )
@@ -25,6 +37,8 @@ uint8_t linkedList::insert(void* key, void* value, unsigned int lenKey, unsigned
         m_head->m_lenValue = lenValue;
         m_head->m_ttl_sec = ttl_sec;
         m_head->m_next = nullptr;
+
+        m_queuePUB->push(m_name, key, lenKey, UPDATED_PUB);
 
         return UPDATED_PUB;
     }
@@ -59,6 +73,9 @@ uint8_t linkedList::insert(void* key, void* value, unsigned int lenKey, unsigned
             node->m_value = value;
             node->m_lenValue = lenValue;
             node->m_ttl_sec = ttl_sec;
+
+            m_queuePUB->push(m_name, key, lenKey, UPDATED_PUB);
+
             return UPDATED_PUB;
         }
         else if( node == nullptr )
@@ -70,6 +87,9 @@ uint8_t linkedList::insert(void* key, void* value, unsigned int lenKey, unsigned
             nodePrev->m_next->m_lenValue = lenValue;
             nodePrev->m_next->m_ttl_sec = ttl_sec;
             nodePrev->m_next->m_next = nullptr;
+
+            m_queuePUB->push(m_name, key, lenKey, UPDATED_PUB);
+
             return UPDATED_PUB;
         }
     }
@@ -119,6 +139,9 @@ uint8_t linkedList::remove(void* key, unsigned int lenKey)
                 {
                     m_head = nullptr;
                     delete node;
+
+                    m_queuePUB->push(m_name, key, lenKey, DELETED_PUB);
+
                     return DELETED_PUB;
                 }
             }

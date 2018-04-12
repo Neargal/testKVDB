@@ -1,6 +1,6 @@
 #include "baseData.hpp"
 
-baseData::baseData()
+baseData::baseData() : m_queuePUB(nullptr)
 {
     for(int i = 0; i < TABLE_SIZE; i++)
     {
@@ -35,6 +35,11 @@ unsigned int baseData::hash(char* nameTable)
     return index;
 }
 
+bool baseData::setQueuePUB(queuePUB* queuePUB)
+{
+    m_queuePUB = queuePUB;
+}
+
 uint8_t baseData::createTable(char* nameTable)
 {
     unsigned int index = baseData::hash(nameTable);
@@ -42,6 +47,7 @@ uint8_t baseData::createTable(char* nameTable)
     if( m_table[index] == nullptr )
     {
         m_table[index] = new listTable;
+        m_table[index]->setQueuePUB(m_queuePUB);
     }
 
     return m_table[index]->createTable(nameTable);

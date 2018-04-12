@@ -1,6 +1,6 @@
 #include "listTable.hpp"
 
-listTable::listTable() : m_head(nullptr) {}
+listTable::listTable() : m_head(nullptr), m_queuePUB(nullptr) {}
 
 listTable::~listTable()
 {
@@ -14,6 +14,11 @@ listTable::~listTable()
     }
 }
 
+bool listTable::setQueuePUB(queuePUB* queuePUB)
+{
+    m_queuePUB = queuePUB;
+}
+
 uint8_t listTable::createTable(char* nameTable)
 {
     if( m_head == nullptr )
@@ -22,6 +27,7 @@ uint8_t listTable::createTable(char* nameTable)
         m_head->m_name = nameTable;
         m_head->m_next = nullptr;
         m_head->m_table = new hashTable;
+        m_head->m_table->setQueuePUB(m_queuePUB);
         return OK;
     }
     else
@@ -54,6 +60,7 @@ uint8_t listTable::createTable(char* nameTable)
             nodePrev->m_next->m_name = nameTable;
             nodePrev->m_next->m_next = nullptr;
             nodePrev->m_next->m_table = new hashTable;
+            nodePrev->m_table->setQueuePUB(m_queuePUB);
             return OK;
         }
     }
@@ -138,7 +145,7 @@ uint8_t listTable::insert(char* nameTable, void* key, void* value, unsigned int 
 
         if( collision )
         {
-            return node->m_table->insert(key, value, lenKey, lenValue, ttl_sec);
+            return node->m_table->insert(nameTable, key, value, lenKey, lenValue, ttl_sec);
         }
         else
         {

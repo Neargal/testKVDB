@@ -25,3 +25,12 @@
 #define NOT_ENOUGH_ARG        25
 #define TOO_MUCH_ARG          26
 #define TOO_BIG_ARG           27
+#define PUB_UPDATE_DONE       28
+
+#define MAX_SIZE_REQ   1
+#define MAX_SIZE_TABLE 255
+#define MAX_SIZE_KEY   sizeof(uint64_t)
+#define MAX_SIZE_TTL   sizeof(uint64_t)
+
+#define SOCK_REP_EP "ipc:///kvdb.api.rep"
+#define SOCK_PUB_EP "ipc:///kvdb.api.pub"

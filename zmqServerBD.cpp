@@ -7,8 +7,11 @@ zmqServerBD::zmqServerBD() : m_request(0), m_reply(0), m_nameTable(nullptr), m_k
 	m_rep = zmq_socket(m_context, ZMQ_REP);
 	m_pub = zmq_socket(m_context, ZMQ_PUB);
 
-	zmq_bind(m_rep, "ipc:///kvdb.api.rep");
-	zmq_bind(m_pub, "ipc:///kvdb.api.pub");
+	zmq_bind(m_rep, SOCK_REP_EP);
+	zmq_bind(m_pub, SOCK_PUB_EP);
+
+	m_queuePUB.setSockPUB(m_pub);
+	m_baseData.setQueuePUB(&m_queuePUB);
 }
 
 zmqServerBD::~zmqServerBD()
@@ -31,28 +34,6 @@ bool zmqServerBD::errRep(uint8_t reason)
     zmq_msg_init_size(&message, 1);
     memcpy(zmq_msg_data(&message), &reason, 1);
     zmq_msg_send(&message, m_rep, 0);
-    zmq_msg_close(&message);
-
-    return true;
-}
-
-bool zmqServerBD::sendPub(uint8_t reason)
-{
-    zmq_msg_t message;
-
-    zmq_msg_init_size(&message, strlen(m_nameTable));
-    memcpy(zmq_msg_data(&message), m_nameTable, strlen(m_nameTable));
-    zmq_msg_send(&message, m_pub, ZMQ_SNDMORE);
-    zmq_msg_close(&message);
-
-    zmq_msg_init_size(&message, 1);
-    memcpy(zmq_msg_data(&message), &reason, 1);
-    zmq_msg_send(&message, m_pub, ZMQ_SNDMORE);
-    zmq_msg_close(&message);
-
-    zmq_msg_init_size(&message, m_lenKey);
-    memcpy(zmq_msg_data(&message), m_key, m_lenKey);
-    zmq_msg_send(&message, m_pub, 0);
     zmq_msg_close(&message);
 
     return true;
@@ -298,8 +279,6 @@ void zmqServerBD::run()
                                 zmq_msg_send(&message, m_rep, 0);
                                 zmq_msg_close(&message);
                                 printf("Update key done in [%s]\n", m_nameTable);
-
-                                sendPub(UPDATED_PUB);
                             }
                             else
                             {
@@ -386,8 +365,6 @@ void zmqServerBD::run()
                                 zmq_msg_send(&message, m_rep, 0);
                                 zmq_msg_close(&message);
                                 printf("Delete key done in [%s]\n", m_nameTable);
-
-                                sendPub(DELETED_PUB);
                             }
                             else
                             {
@@ -509,7 +486,7 @@ void zmqServerBD::run()
         }
         if( m_items[1].revents & ZMQ_POLLOUT )
         {
-            //NOTHING
+            while( m_queuePUB.pop() != PUB_UPDATE_DONE ) {}
         }
         while( m_baseData.updateTTL() != TTL_UPDATE_DONE ) {}
     }
