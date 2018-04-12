@@ -164,6 +164,8 @@ void zmqServerBD::run()
                                 zmq_msg_send(&message, m_rep, 0);
                                 zmq_msg_close(&message);
                                 printf("Delete table done: [%s]\n", m_nameTable);
+                                free(m_nameTable);
+                                m_nameTable = nullptr;
                             }
                             else
                             {
@@ -279,6 +281,8 @@ void zmqServerBD::run()
                                 zmq_msg_send(&message, m_rep, 0);
                                 zmq_msg_close(&message);
                                 printf("Update key done in [%s]\n", m_nameTable);
+                                free(m_nameTable);
+                                m_nameTable = nullptr;
                             }
                             else
                             {
@@ -365,6 +369,8 @@ void zmqServerBD::run()
                                 zmq_msg_send(&message, m_rep, 0);
                                 zmq_msg_close(&message);
                                 printf("Delete key done in [%s]\n", m_nameTable);
+                                free(m_nameTable);
+                                m_nameTable = nullptr;
                             }
                             else
                             {
@@ -452,6 +458,9 @@ void zmqServerBD::run()
                                 memcpy(zmq_msg_data(&message), node->m_value, node->m_lenValue);
                                 zmq_msg_send(&message, m_rep, 0);
                                 zmq_msg_close(&message);
+
+                                free(m_nameTable);
+                                m_nameTable = nullptr;
                             }
                             else
                             {
