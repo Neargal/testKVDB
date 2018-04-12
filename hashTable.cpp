@@ -22,7 +22,6 @@ hashTable::~hashTable()
 bool hashTable::setQueuePUB(queuePUB* queuePUB)
 {
     m_queuePUB = queuePUB;
-    return true;
 }
 
 unsigned int hashTable::hash(void* key, unsigned int lenKey)

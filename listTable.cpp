@@ -17,7 +17,6 @@ listTable::~listTable()
 bool listTable::setQueuePUB(queuePUB* queuePUB)
 {
     m_queuePUB = queuePUB;
-    return true;
 }
 
 uint8_t listTable::createTable(char* nameTable)
