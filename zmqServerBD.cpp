@@ -21,6 +21,30 @@ zmqServerBD::~zmqServerBD()
 	zmq_ctx_destroy(m_context);
 }
 
+void zmqServerBD::freeN()
+{
+    free(m_nameTable);
+    m_nameTable = nullptr;
+}
+
+void zmqServerBD::freeNK()
+{
+    free(m_nameTable);
+    m_nameTable = nullptr;
+    free(m_key);
+    m_key = nullptr;
+}
+
+void zmqServerBD::freeNKV()
+{
+    free(m_nameTable);
+    m_nameTable = nullptr;
+    free(m_key);
+    m_key = nullptr;
+    free(m_value);
+    m_value = nullptr;
+}
+
 bool zmqServerBD::errRep(uint8_t reason)
 {
     zmq_msg_t message;
@@ -61,7 +85,6 @@ bool zmqServerBD::reqTableName()
     if( size + 1 >= MAX_SIZE_TABLE )
     {
         errRep(TOO_BIG_ARG);
-        m_more = 0;
         return false;
     }
     m_nameTable = (char*)malloc(size + 1);
@@ -82,7 +105,6 @@ bool zmqServerBD::reqKey()
     if( m_lenKey > MAX_SIZE_KEY )
     {
         errRep(TOO_BIG_ARG);
-        m_more = 0;
         return false;
     }
     m_key = (void*)malloc(m_lenKey);
@@ -102,13 +124,289 @@ bool zmqServerBD::reqValue()
     if( m_lenValue > MAX_SIZE_VALUE )
     {
         errRep(TOO_BIG_ARG);
-        m_more = 0;
         return false;
     }
     m_value = (void*)malloc(m_lenValue);
     memcpy(m_value, zmq_msg_data(&message), m_lenValue);
     zmq_getsockopt(m_rep, ZMQ_RCVMORE, &m_more, &m_more_size);
     zmq_msg_close(&message);
+
+    return true;
+}
+
+bool zmqServerBD::reqCreateTable()
+{
+    zmq_msg_t message;
+
+    if( m_more )
+    {
+        if( !reqTableName() )
+        {
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        return false;
+    }
+    if( !m_more )
+    {
+        m_reply = m_baseData.createTable(m_nameTable);
+        if( m_reply == OK )
+        {
+            okRep();
+            printf("Create table done: [%s]\n", m_nameTable);
+        }
+        else
+        {
+            errRep(m_reply);
+            freeN();
+        }
+    }
+    else
+    {
+        errRep(TOO_MUCH_ARG);
+        freeN();
+    }
+
+    return true;
+}
+
+bool zmqServerBD::reqDeleteTable()
+{
+    zmq_msg_t message;
+
+    if( m_more )
+    {
+        if( !reqTableName() )
+        {
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        return false;
+    }
+    if( !m_more )
+    {
+        m_reply = m_baseData.removeTable(m_nameTable);
+
+        if( m_reply == OK )
+        {
+            okRep();
+            printf("Delete table done: [%s]\n", m_nameTable);
+            freeN();
+        }
+        else
+        {
+            errRep(m_reply);
+            freeN();
+        }
+    }
+    else
+    {
+        errRep(TOO_MUCH_ARG);
+        freeN();
+    }
+
+    return true;
+}
+
+bool zmqServerBD::reqUpdate()
+{
+    zmq_msg_t message;
+
+    if( m_more )
+    {
+        if( !reqTableName() )
+        {
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        return false;
+    }
+    if( m_more )
+    {
+        if( !reqKey() )
+        {
+            freeN();
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        freeN();
+        return false;
+    }
+    if( m_more )
+    {
+        if( !reqValue() )
+        {
+
+            freeNK();
+            return false;
+        }
+    }
+    if( m_more )
+    {
+        zmq_msg_init(&message);
+        int size = zmq_msg_recv(&message, m_rep, 0);
+        if( size != MAX_SIZE_TTL )
+        {
+            errRep(TOO_BIG_ARG);
+            return false;
+        }
+        memcpy(&m_ttl_sec, zmq_msg_data(&message), size);
+        zmq_getsockopt(m_rep, ZMQ_RCVMORE, &m_more, &m_more_size);
+        zmq_msg_close(&message);
+    }
+    else
+    {
+        m_ttl_sec = 0;
+    }
+    if( !m_more )
+    {
+        m_reply = m_baseData.insert(m_nameTable, m_key, m_value, m_lenKey, m_lenValue, m_ttl_sec);
+
+        if( m_reply == UPDATED_PUB )
+        {
+            okRep();
+            printf("Update key done in [%s]\n", m_nameTable);
+            freeN();
+        }
+        else
+        {
+            errRep(m_reply);
+            freeNKV();
+        }
+    }
+    else
+    {
+        errRep(TOO_MUCH_ARG);
+        freeNKV();
+    }
+
+    return true;
+}
+
+bool zmqServerBD::reqDelete()
+{
+    zmq_msg_t message;
+
+    if( m_more )
+    {
+        if( !reqTableName() )
+        {
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        return false;
+    }
+    if( m_more )
+    {
+        if( !reqKey() )
+        {
+            freeN();
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        freeN();
+        return false;
+    }
+    if( !m_more )
+    {
+        m_reply = m_baseData.remove(m_nameTable, m_key, m_lenKey);
+
+        if( m_reply == DELETED_PUB )
+        {
+            okRep();
+            printf("Delete key done in [%s]\n", m_nameTable);
+            freeNK();
+        }
+        else
+        {
+            errRep(m_reply);
+            freeNK();
+        }
+    }
+    else
+    {
+        errRep(TOO_MUCH_ARG);
+        freeNK();
+    }
+
+    return true;
+}
+
+bool zmqServerBD::reqGet()
+{
+    zmq_msg_t message;
+
+    if( m_more )
+    {
+        reqTableName();
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        freeN();
+        return false;
+    }
+    if( m_more )
+    {
+        if( !reqKey() )
+        {
+            freeN();
+            return false;
+        }
+    }
+    else
+    {
+        errRep(NOT_ENOUGH_ARG);
+        freeN();
+        return false;
+    }
+    if( !m_more )
+    {
+        Node* node = m_baseData.find(m_nameTable, m_key, m_lenKey);
+        if( node != nullptr )
+        {
+            m_reply = OK_REP;
+            zmq_msg_init_size(&message, 1);
+            memcpy(zmq_msg_data(&message), &m_reply, 1);
+            zmq_msg_send(&message, m_rep, ZMQ_SNDMORE);
+            zmq_msg_close(&message);
+
+            zmq_msg_init_size(&message, node->m_lenValue);
+            memcpy(zmq_msg_data(&message), node->m_value, node->m_lenValue);
+            zmq_msg_send(&message, m_rep, 0);
+            zmq_msg_close(&message);
+
+            freeNK();
+        }
+        else
+        {
+            errRep(m_reply);
+            freeNK();
+        }
+    }
+    else
+    {
+        errRep(TOO_MUCH_ARG);
+        freeNK();
+    }
 
     return true;
 }
@@ -148,316 +446,31 @@ void zmqServerBD::run()
                 {
                     case CREATE_TABLE_REQ:
                     {
-                        if( m_more )
-                        {
-                            if( !reqTableName() )
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            m_more = 0;
-                            break;
-                        }
-                        if( !m_more )
-                        {
-                            m_reply = m_baseData.createTable(m_nameTable);
-
-                            if( m_reply == OK )
-                            {
-                                okRep();
-                                printf("Create table done: [%s]\n", m_nameTable);
-                            }
-                            else
-                            {
-                                errRep(m_reply);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                            }
-                        }
-                        else
-                        {
-                            errRep(TOO_MUCH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                        }
+                        reqCreateTable();
                         m_more = 0;
                         break;
                     }
                     case DELETE_TABLE_REQ:
                     {
-                        if( m_more )
-                        {
-                            if( !reqTableName() )
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            m_more = 0;
-                            break;
-                        }
-                        if( !m_more )
-                        {
-                            m_reply = m_baseData.removeTable(m_nameTable);
-
-                            if( m_reply == OK )
-                            {
-                                okRep();
-                                printf("Delete table done: [%s]\n", m_nameTable);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                            }
-                            else
-                            {
-                                errRep(m_reply);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                            }
-                        }
-                        else
-                        {
-                            errRep(TOO_MUCH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                        }
+                        reqDeleteTable();
                         m_more = 0;
                         break;
                     }
                     case UPDATE_REQ:
                     {
-                        if( m_more )
-                        {
-                            if( !reqTableName() )
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            m_more = 0;
-                            break;
-                        }
-                        if( m_more )
-                        {
-                            if( !reqKey() )
-                            {
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            m_more = 0;
-                            break;
-                        }
-                        if( m_more )
-                        {
-                            if( !reqValue() )
-                            {
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                free(m_key);
-                                m_key = nullptr;
-                                break;
-                            }
-                        }
-                        if( m_more )
-                        {
-                            zmq_msg_init(&message);
-                            int size = zmq_msg_recv(&message, m_rep, 0);
-                            if( size > sizeof(uint64_t) )
-                            {
-                                errRep(TOO_BIG_ARG);
-                                m_more = 0;
-                                break;
-                            }
-                            memcpy(&m_ttl_sec, zmq_msg_data(&message), sizeof(uint64_t));
-                            zmq_getsockopt(m_rep, ZMQ_RCVMORE, &m_more, &m_more_size);
-                            zmq_msg_close(&message);
-                        }
-                        else
-                        {
-                            m_ttl_sec = 0;
-                        }
-                        if( !m_more )
-                        {
-                            m_reply = m_baseData.insert(m_nameTable, m_key, m_value, m_lenKey, m_lenValue, m_ttl_sec);
-
-                            if( m_reply == UPDATED_PUB )
-                            {
-                                okRep();
-                                printf("Update key done in [%s]\n", m_nameTable);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                            }
-                            else
-                            {
-                                errRep(m_reply);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                free(m_key);
-                                m_key = nullptr;
-                                free(m_value);
-                                m_value = nullptr;
-                            }
-                        }
-                        else
-                        {
-                            errRep(TOO_MUCH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            free(m_key);
-                            m_key = nullptr;
-                            free(m_value);
-                            m_value = nullptr;
-                        }
+                        reqUpdate();
                         m_more = 0;
                         break;
                     }
                     case DELETE_REQ:
                     {
-                        if( m_more )
-                        {
-                            if( !reqTableName() )
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            m_more = 0;
-                            break;
-                        }
-                        if( m_more )
-                        {
-                            if( !reqKey() )
-                            {
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            m_more = 0;
-                            break;
-                        }
-                        if( !m_more )
-                        {
-                            m_reply = m_baseData.remove(m_nameTable, m_key, m_lenKey);
-
-                            if( m_reply == DELETED_PUB )
-                            {
-                                okRep();
-                                printf("Delete key done in [%s]\n", m_nameTable);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                free(m_key);
-                                m_key = nullptr;
-                            }
-                            else
-                            {
-                                errRep(m_reply);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                free(m_key);
-                                m_key = nullptr;
-                            }
-                        }
-                        else
-                        {
-                            errRep(TOO_MUCH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            free(m_key);
-                            m_key = nullptr;
-                        }
+                        reqDelete();
                         m_more = 0;
                         break;
                     }
                     case GET_REQ:
                     {
-                        if( m_more )
-                        {
-                            reqTableName();
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            m_more = 0;
-                            break;
-                        }
-                        if( m_more )
-                        {
-                            if( !reqKey() )
-                            {
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            errRep(NOT_ENOUGH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            m_more = 0;
-                            break;
-                        }
-                        if( !m_more )
-                        {
-                            Node* node = m_baseData.find(m_nameTable, m_key, m_lenKey);
-                            if( node != nullptr )
-                            {
-                                m_reply = OK_REP;
-                                zmq_msg_init_size(&message, 1);
-                                memcpy(zmq_msg_data(&message), &m_reply, 1);
-                                zmq_msg_send(&message, m_rep, ZMQ_SNDMORE);
-                                zmq_msg_close(&message);
-
-                                zmq_msg_init_size(&message, node->m_lenValue);
-                                memcpy(zmq_msg_data(&message), node->m_value, node->m_lenValue);
-                                zmq_msg_send(&message, m_rep, 0);
-                                zmq_msg_close(&message);
-
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                free(m_key);
-                                m_key = nullptr;
-                            }
-                            else
-                            {
-                                errRep(m_reply);
-                                free(m_nameTable);
-                                m_nameTable = nullptr;
-                                free(m_key);
-                                m_key = nullptr;
-                            }
-                        }
-                        else
-                        {
-                            errRep(TOO_MUCH_ARG);
-                            free(m_nameTable);
-                            m_nameTable = nullptr;
-                            free(m_key);
-                            m_key = nullptr;
-                        }
+                        reqGet();
                         m_more = 0;
                         break;
                     }
@@ -469,7 +482,7 @@ void zmqServerBD::run()
                 }
 
                 if( !m_more )
-                    break; // Last message part
+                    break;
             }
         }
         if( m_items[1].revents & ZMQ_POLLOUT )

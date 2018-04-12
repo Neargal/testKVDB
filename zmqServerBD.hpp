@@ -38,6 +38,16 @@ private:
 	bool reqTableName();
 	bool reqKey();
 	bool reqValue();
+	bool reqCreateTable();
+	bool reqDeleteTable();
+	bool reqUpdate();
+	bool reqDelete();
+	bool reqGet();
+
+	void freeN();
+	void freeNK();
+	void freeNKV();
+
 
 public:
     zmqServerBD();
