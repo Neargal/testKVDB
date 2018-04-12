@@ -32,5 +32,5 @@
 #define MAX_SIZE_KEY   sizeof(uint64_t)
 #define MAX_SIZE_TTL   sizeof(uint64_t)
 
-#define SOCK_REP_EP "tcp://*:4041"
-#define SOCK_PUB_EP "tcp://*:4040"
+#define SOCK_REP_EP "ipc:///kvdb.api.rep"
+#define SOCK_PUB_EP "ipc:///kvdb.api.pub"
