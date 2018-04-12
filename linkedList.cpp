@@ -25,7 +25,8 @@ bool linkedList::setQueuePUB(queuePUB* queuePUB)
 bool linkedList::setNameTable(char* nameTable)
 {
     m_name = (char*)malloc(strlen(nameTable) + 1);
-    memcpy(m_name, nameTable, strlen(nameTable) + 1);
+    memcpy(m_name, nameTable, strlen(nameTable));
+    m_name[strlen(nameTable)] = 0;
     return true;
 }
 
