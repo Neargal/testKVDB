@@ -66,8 +66,9 @@ uint8_t queuePUB::push(char* nameTable, void* key, unsigned int lenKey, uint8_t 
     {
         nodePUB* node = new nodePUB;
         node->m_next = nullptr;
-        node->m_nameTable = (char*)malloc(strlen(nameTable));
+        node->m_nameTable = (char*)malloc(strlen(nameTable) + 1);
         memcpy(node->m_nameTable, nameTable, strlen(nameTable));
+        node->m_nameTable[strlen(nameTable)] = 0;
         node->m_key = (void*)malloc(lenKey);
         memcpy(node->m_key, key, lenKey);
         node->m_lenKey = lenKey;
