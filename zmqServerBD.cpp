@@ -157,20 +157,23 @@ bool zmqServerBD::reqCreateTable()
         {
             okRep();
             printf("Create table done: [%s]\n", m_nameTable);
+            return true;
         }
         else
         {
             errRep(m_reply);
             freeN();
+            return false;
         }
     }
     else
     {
         errRep(TOO_MUCH_ARG);
         freeN();
+        return false;
     }
 
-    return true;
+    return false;
 }
 
 bool zmqServerBD::reqDeleteTable()
@@ -198,20 +201,23 @@ bool zmqServerBD::reqDeleteTable()
             okRep();
             printf("Delete table done: [%s]\n", m_nameTable);
             freeN();
+            return true;
         }
         else
         {
             errRep(m_reply);
             freeN();
+            return false;
         }
     }
     else
     {
         errRep(TOO_MUCH_ARG);
         freeN();
+        return false;
     }
 
-    return true;
+    return false;
 }
 
 bool zmqServerBD::reqUpdate()
@@ -279,20 +285,23 @@ bool zmqServerBD::reqUpdate()
             okRep();
             printf("Update key done in [%s]\n", m_nameTable);
             freeN();
+            return true;
         }
         else
         {
             errRep(m_reply);
             freeNKV();
+            return false;
         }
     }
     else
     {
         errRep(TOO_MUCH_ARG);
         freeNKV();
+        return false;
     }
 
-    return true;
+    return false;
 }
 
 bool zmqServerBD::reqDelete()
@@ -334,20 +343,23 @@ bool zmqServerBD::reqDelete()
             okRep();
             printf("Delete key done in [%s]\n", m_nameTable);
             freeNK();
+            return true;
         }
         else
         {
             errRep(m_reply);
             freeNK();
+            return false;
         }
     }
     else
     {
         errRep(TOO_MUCH_ARG);
         freeNK();
+        return false;
     }
 
-    return true;
+    return false;
 }
 
 bool zmqServerBD::reqGet()
@@ -395,20 +407,23 @@ bool zmqServerBD::reqGet()
             zmq_msg_close(&message);
 
             freeNK();
+            return true;
         }
         else
         {
             errRep(m_reply);
             freeNK();
+            return false;
         }
     }
     else
     {
         errRep(TOO_MUCH_ARG);
         freeNK();
+        return false;
     }
 
-    return true;
+    return false;
 }
 
 void zmqServerBD::run()
