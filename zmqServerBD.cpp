@@ -156,7 +156,7 @@ bool zmqServerBD::reqCreateTable()
         if( m_reply == OK )
         {
             okRep();
-            printf("Create table done: [%s]\n", m_nameTable);
+            //printf("Create table done: [%s]\n", m_nameTable);
             return true;
         }
         else
@@ -199,7 +199,7 @@ bool zmqServerBD::reqDeleteTable()
         if( m_reply == OK )
         {
             okRep();
-            printf("Delete table done: [%s]\n", m_nameTable);
+            //printf("Delete table done: [%s]\n", m_nameTable);
             freeN();
             return true;
         }
@@ -283,7 +283,7 @@ bool zmqServerBD::reqUpdate()
         if( m_reply == UPDATED_PUB )
         {
             okRep();
-            printf("Update key done in [%s]\n", m_nameTable);
+            //printf("Update key done in [%s]\n", m_nameTable);
             freeN();
             return true;
         }
@@ -341,7 +341,7 @@ bool zmqServerBD::reqDelete()
         if( m_reply == DELETED_PUB )
         {
             okRep();
-            printf("Delete key done in [%s]\n", m_nameTable);
+            //printf("Delete key done in [%s]\n", m_nameTable);
             freeNK();
             return true;
         }
