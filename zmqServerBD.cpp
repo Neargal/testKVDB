@@ -57,7 +57,7 @@ bool zmqServerBD::errRep(uint8_t reason)
 
     zmq_msg_init_size(&message, SIZE_REQ);
     memcpy(zmq_msg_data(&message), &reason, SIZE_REQ);
-    zmq_msg_send(&message, m_rep, NULL);
+    zmq_msg_send(&message, m_rep, 0);
     zmq_msg_close(&message);
 
     return true;
@@ -70,7 +70,7 @@ bool zmqServerBD::okRep()
     uint8_t reply = OK_REP;
     zmq_msg_init_size(&message, SIZE_REQ);
     memcpy(zmq_msg_data(&message), &m_reply, SIZE_REQ);
-    zmq_msg_send(&message, m_rep, NULL);
+    zmq_msg_send(&message, m_rep, 0);
     zmq_msg_close(&message);
 
     return true;
@@ -81,7 +81,7 @@ bool zmqServerBD::reqTableName()
     zmq_msg_t message;
 
     zmq_msg_init(&message);
-    int size = zmq_msg_recv(&message, m_rep, NULL);
+    int size = zmq_msg_recv(&message, m_rep, 0);
     if( size + 1 >= MAX_SIZE_TABLE )
     {
         errRep(TOO_BIG_ARG);
@@ -101,7 +101,7 @@ bool zmqServerBD::reqKey()
     zmq_msg_t message;
 
     zmq_msg_init(&message);
-    m_lenKey = zmq_msg_recv(&message, m_rep, NULL);
+    m_lenKey = zmq_msg_recv(&message, m_rep, 0);
     if( m_lenKey > MAX_SIZE_KEY )
     {
         errRep(TOO_BIG_ARG);
@@ -120,7 +120,7 @@ bool zmqServerBD::reqValue()
     zmq_msg_t message;
 
     zmq_msg_init(&message);
-    m_lenValue = zmq_msg_recv(&message, m_rep, NULL);
+    m_lenValue = zmq_msg_recv(&message, m_rep, 0);
     if( m_lenValue > MAX_SIZE_VALUE )
     {
         errRep(TOO_BIG_ARG);
@@ -136,8 +136,6 @@ bool zmqServerBD::reqValue()
 
 bool zmqServerBD::reqCreateTable()
 {
-    zmq_msg_t message;
-
     if( m_more )
     {
         if( !reqTableName() )
@@ -178,8 +176,6 @@ bool zmqServerBD::reqCreateTable()
 
 bool zmqServerBD::reqDeleteTable()
 {
-    zmq_msg_t message;
-
     if( m_more )
     {
         if( !reqTableName() )
@@ -262,7 +258,7 @@ bool zmqServerBD::reqUpdate()
     if( m_more )
     {
         zmq_msg_init(&message);
-        int size = zmq_msg_recv(&message, m_rep, NULL);
+        int size = zmq_msg_recv(&message, m_rep, 0);
         if( size != MAX_SIZE_TTL )
         {
             errRep(TOO_BIG_ARG);
@@ -306,8 +302,6 @@ bool zmqServerBD::reqUpdate()
 
 bool zmqServerBD::reqDelete()
 {
-    zmq_msg_t message;
-
     if( m_more )
     {
         if( !reqTableName() )
@@ -403,7 +397,7 @@ bool zmqServerBD::reqGet()
 
             zmq_msg_init_size(&message, node->m_lenValue);
             memcpy(zmq_msg_data(&message), node->m_value, node->m_lenValue);
-            zmq_msg_send(&message, m_rep, NULL);
+            zmq_msg_send(&message, m_rep, 0);
             zmq_msg_close(&message);
 
             freeNK();
@@ -443,7 +437,7 @@ void zmqServerBD::run()
             {
                 zmq_msg_t message;
                 zmq_msg_init(&message);
-                int size = zmq_msg_recv(&message, m_rep, NULL);
+                int size = zmq_msg_recv(&message, m_rep, 0);
                 if( SIZE_REQ == size )
                 {
                     memcpy(&m_request, zmq_msg_data(&message), size);
