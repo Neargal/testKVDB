@@ -27,7 +27,7 @@
 #define TOO_BIG_ARG           27
 #define PUB_UPDATE_DONE       28
 
-#define SIZE_REQ   1
+#define SIZE_REQ       1
 #define MAX_SIZE_TABLE 255
 #define MAX_SIZE_VALUE 1024
 #define MAX_SIZE_KEY   sizeof(uint64_t)
