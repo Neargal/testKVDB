@@ -80,6 +80,8 @@ uint8_t linkedList::insert(void* key, void* value, unsigned int lenKey, unsigned
 
             m_queuePUB->push(m_name, key, lenKey, UPDATED_PUB);
 
+            free(key);
+
             return UPDATED_PUB;
         }
         else if( node == nullptr )
