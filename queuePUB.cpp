@@ -32,14 +32,14 @@ uint8_t queuePUB::sendPub(char* nameTable, void* key, unsigned int lenKey, uint8
     zmq_msg_send(&message, m_pub, ZMQ_SNDMORE);
     zmq_msg_close(&message);
 
-    zmq_msg_init_size(&message, 1);
-    memcpy(zmq_msg_data(&message), &reason, 1);
+    zmq_msg_init_size(&message, SIZE_REQ);
+    memcpy(zmq_msg_data(&message), &reason, SIZE_REQ);
     zmq_msg_send(&message, m_pub, ZMQ_SNDMORE);
     zmq_msg_close(&message);
 
     zmq_msg_init_size(&message, lenKey);
     memcpy(zmq_msg_data(&message), key, lenKey);
-    zmq_msg_send(&message, m_pub, 0);
+    zmq_msg_send(&message, m_pub, NULL);
     zmq_msg_close(&message);
 
     return OK;
