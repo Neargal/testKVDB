@@ -69,7 +69,7 @@ bool zmqServerBD::okRep()
 
     uint8_t reply = OK_REP;
     zmq_msg_init_size(&message, SIZE_REQ);
-    memcpy(zmq_msg_data(&message), &m_reply, SIZE_REQ);
+    memcpy(zmq_msg_data(&message), &reply, SIZE_REQ);
     zmq_msg_send(&message, m_rep, 0);
     zmq_msg_close(&message);
 
@@ -262,6 +262,7 @@ bool zmqServerBD::reqUpdate()
         if( size != MAX_SIZE_TTL )
         {
             errRep(TOO_BIG_ARG);
+            freeNKV();
             return false;
         }
         memcpy(&m_ttl_sec, zmq_msg_data(&message), size);

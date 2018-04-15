@@ -20,9 +20,8 @@ public:
     void* m_key;
     unsigned int m_lenKey;
     uint64_t m_ttl_sec;
-    uint8_t m_state;
 
-    nodeTTL() : m_next(nullptr), m_nameTable(nullptr), m_key(nullptr), m_lenKey(0), m_ttl_sec(0), m_state(OK) {}
+    nodeTTL() : m_next(nullptr), m_nameTable(nullptr), m_key(nullptr), m_lenKey(0), m_ttl_sec(0) {}
     ~nodeTTL()
     {
         if( m_nameTable != nullptr )

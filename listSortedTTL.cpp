@@ -19,14 +19,15 @@ nodeTTL* listSortedTTL::top()
     return m_head;
 }
 
-bool listSortedTTL::push(char* nameTable, void* key, unsigned int lenKey, unsigned long long int ttl_sec)
+bool listSortedTTL::push(char* nameTable, void* key, unsigned int lenKey, uint64_t ttl_sec)
 {
     if( m_head == nullptr )
     {
         m_head = new nodeTTL;
 
-        m_head->m_nameTable = (char*)malloc(strlen(nameTable));
+        m_head->m_nameTable = (char*)malloc(strlen(nameTable) + 1);
         memcpy(m_head->m_nameTable, nameTable, strlen(nameTable));
+        m_head->m_nameTable[strlen(nameTable)] = 0;
         m_head->m_key = (void*)malloc(lenKey);
         memcpy(m_head->m_key, key, lenKey);
         m_head->m_lenKey = lenKey;
@@ -42,8 +43,9 @@ bool listSortedTTL::push(char* nameTable, void* key, unsigned int lenKey, unsign
             {
                 nodeTTL* node = new nodeTTL;
 
-                node->m_nameTable = (char*)malloc(strlen(nameTable));
+                node->m_nameTable = (char*)malloc(strlen(nameTable) + 1);
                 memcpy(node->m_nameTable, nameTable, strlen(nameTable));
+                m_head->m_nameTable[strlen(nameTable)] = 0;
                 node->m_key = (void*)malloc(lenKey);
                 memcpy(node->m_key, key, lenKey);
                 node->m_lenKey = lenKey;
@@ -68,8 +70,9 @@ bool listSortedTTL::push(char* nameTable, void* key, unsigned int lenKey, unsign
                 nodeTTL* nodeNext = node->m_next;
 
                 node->m_next = new nodeTTL;
-                node->m_next->m_nameTable = (char*)malloc(strlen(nameTable));
+                node->m_next->m_nameTable = (char*)malloc(strlen(nameTable) + 1);
                 memcpy(node->m_next->m_nameTable, nameTable, strlen(nameTable));
+                m_head->m_nameTable[strlen(nameTable)] = 0;
                 node->m_next->m_key = (void*)malloc(lenKey);
                 memcpy(node->m_next->m_key, key, lenKey);
                 node->m_next->m_lenKey = lenKey;
@@ -84,8 +87,9 @@ bool listSortedTTL::push(char* nameTable, void* key, unsigned int lenKey, unsign
             {
                 nodeTTL* node = new nodeTTL;
 
-                node->m_nameTable = (char*)malloc(strlen(nameTable));
+                node->m_nameTable = (char*)malloc(strlen(nameTable) + 1);
                 memcpy(node->m_nameTable, nameTable, strlen(nameTable));
+                m_head->m_nameTable[strlen(nameTable)] = 0;
                 node->m_key = (void*)malloc(lenKey);
                 memcpy(node->m_key, key, lenKey);
                 node->m_lenKey = lenKey;
@@ -98,8 +102,9 @@ bool listSortedTTL::push(char* nameTable, void* key, unsigned int lenKey, unsign
             {
                 m_head->m_next = new nodeTTL;
 
-                m_head->m_next->m_nameTable = (char*)malloc(strlen(nameTable));
+                m_head->m_next->m_nameTable = (char*)malloc(strlen(nameTable) + 1);
                 memcpy(m_head->m_next->m_nameTable, nameTable, strlen(nameTable));
+                m_head->m_nameTable[strlen(nameTable)] = 0;
                 m_head->m_next->m_key = (void*)malloc(lenKey);
                 memcpy(m_head->m_next->m_key, key, lenKey);
                 m_head->m_next->m_lenKey = lenKey;
