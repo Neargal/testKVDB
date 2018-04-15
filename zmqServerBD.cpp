@@ -76,7 +76,7 @@ bool zmqServerBD::okRep()
     return true;
 }
 
-bool zmqServerBD::reqTableName()
+bool zmqServerBD::getReqTableName()
 {
     zmq_msg_t message;
 
@@ -96,7 +96,7 @@ bool zmqServerBD::reqTableName()
     return true;
 }
 
-bool zmqServerBD::reqKey()
+bool zmqServerBD::getReqKey()
 {
     zmq_msg_t message;
 
@@ -115,7 +115,7 @@ bool zmqServerBD::reqKey()
     return true;
 }
 
-bool zmqServerBD::reqValue()
+bool zmqServerBD::getReqValue()
 {
     zmq_msg_t message;
 
@@ -138,7 +138,7 @@ bool zmqServerBD::reqCreateTable()
 {
     if( m_more )
     {
-        if( !reqTableName() )
+        if( !getReqTableName() )
         {
             return false;
         }
@@ -178,7 +178,7 @@ bool zmqServerBD::reqDeleteTable()
 {
     if( m_more )
     {
-        if( !reqTableName() )
+        if( !getReqTableName() )
         {
             return false;
         }
@@ -222,7 +222,7 @@ bool zmqServerBD::reqUpdate()
 
     if( m_more )
     {
-        if( !reqTableName() )
+        if( !getReqTableName() )
         {
             return false;
         }
@@ -234,7 +234,7 @@ bool zmqServerBD::reqUpdate()
     }
     if( m_more )
     {
-        if( !reqKey() )
+        if( !getReqKey() )
         {
             freeN();
             return false;
@@ -248,7 +248,7 @@ bool zmqServerBD::reqUpdate()
     }
     if( m_more )
     {
-        if( !reqValue() )
+        if( !getReqValue() )
         {
 
             freeNK();
@@ -304,7 +304,7 @@ bool zmqServerBD::reqDelete()
 {
     if( m_more )
     {
-        if( !reqTableName() )
+        if( !getReqTableName() )
         {
             return false;
         }
@@ -316,7 +316,7 @@ bool zmqServerBD::reqDelete()
     }
     if( m_more )
     {
-        if( !reqKey() )
+        if( !getReqKey() )
         {
             freeN();
             return false;
@@ -362,7 +362,10 @@ bool zmqServerBD::reqGet()
 
     if( m_more )
     {
-        reqTableName();
+        if( !getReqTableName() )
+        {
+            return false;
+        }
     }
     else
     {
@@ -372,7 +375,7 @@ bool zmqServerBD::reqGet()
     }
     if( m_more )
     {
-        if( !reqKey() )
+        if( !getReqKey() )
         {
             freeN();
             return false;

@@ -35,9 +35,11 @@ private:
 
 	bool errRep(uint8_t reason);
 	bool okRep();
-	bool reqTableName();
-	bool reqKey();
-	bool reqValue();
+
+	bool getReqTableName();
+	bool getReqKey();
+	bool getReqValue();
+
 	bool reqCreateTable();
 	bool reqDeleteTable();
 	bool reqUpdate();
