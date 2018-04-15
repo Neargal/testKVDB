@@ -39,7 +39,7 @@ uint8_t queuePUB::sendPub(char* nameTable, void* key, unsigned int lenKey, uint8
 
     zmq_msg_init_size(&message, lenKey);
     memcpy(zmq_msg_data(&message), key, lenKey);
-    zmq_msg_send(&message, m_pub, NULL);
+    zmq_msg_send(&message, m_pub, 0);
     zmq_msg_close(&message);
 
     return OK;
